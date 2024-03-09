@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 # Todo Model
 class TodoItem(BaseModel):
-    id:int|str
+    id:str
     title:str
     completed:bool
 
