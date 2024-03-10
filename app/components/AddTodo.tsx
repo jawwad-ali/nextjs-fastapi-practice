@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState} from "react";
-import { addTodo, retreive_todos } from "../server/action";
+import { addTodo, retreive_todos, deleteTodo } from "../server/action";
 
 interface TodoProps {
   id: string;
@@ -12,7 +12,8 @@ interface TodoProps {
 const AddTodo = () => {
   const [input, setInput] = useState("");
   const [todos, setTodos] = useState<TodoProps[]>([]);
-  const [loading, setLoading] = useState(false);
+
+  const [loading , setLoading] = useState<boolean>(false)
 
   // Handle Submit
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -27,9 +28,7 @@ const AddTodo = () => {
   const fetchData = async () => {
     try {
       const todosData = await retreive_todos(); // Assuming fetchTodos returns an array of todos
-      // setLoading(true);
       setTodos(todosData);
-      // setLoading(false);
 
       console.log(todosData);
     } catch (error) {
@@ -37,9 +36,27 @@ const AddTodo = () => {
     }
   };
 
+  const handleDelete = async (id:string) => {
+    try {
+      // Call the deleteTodo function from your API
+      await deleteTodo(id); 
+      // Filter out the deleted todo from the state
+      const updatedTodos = todos.filter(todo => todo.id !== id);
+      // Update the state with the filtered todos
+      setTodos(updatedTodos);
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+    }
+  };
+
   useEffect(() => {
+    
+    setLoading(true)
     fetchData();
-  }, [input]);
+    setLoading(false)
+
+
+  }, [input ]);
 
   return (
     <>
@@ -57,13 +74,19 @@ const AddTodo = () => {
       </form>
 
       {/* Listing the todos */}
-      <ol className="flex flex-wrap gap-4 mt-5">
+      <ol className="flex flex-col gap-4 mt-5">
+        {
+          loading && <h2>Loading...</h2>
+        }
+
         {todos?.map((todo: TodoProps) => (
           <>
             <li className="" key={todo.id}>
-              {" "}
+              {/* {todo.id} */}
               {todo.title}
+            <button className="w-24 h-10 bg-red-500 text-white ml-5" onClick={() => handleDelete(todo.id)}>Delete Todo </button>
             </li>
+
           </>
         ))}
       </ol>
